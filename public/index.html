@@ -16,11 +16,7 @@
 
     <script>
       let myAddress = "https://my-test-multiuser-webapp.glitch.me/";
-      let socket = io(myAddress, {
-        headers: {
-          "user-agent": "Safari",
-        },
-      });
+      let socket = io();
 
       socket.on("connect", function () {
         console.log("connected to server");
