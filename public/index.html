@@ -1,75 +1,76 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Socket.io</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <script
-      src="https://code.jquery.com/jquery-3.6.4.min.js"
-      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
-      crossorigin="anonymous"
-    ></script>
-  </head>
-  <body>
-    <h1 id="username"></h1>
-    <script src="/socket.io/socket.io.js"></script>
+<head>
+	<title>Multi-user interactive interface</title>
+	<!-- jQuery and jQuery UI CDN -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="myStyle.css">
 
-    <script>
-      let myAddress = "https://my-test-multiuser-webapp.glitch.me/";
-      let socket = io();
+</head>
+<body>
+	<div class="block" id="block1">Block 1</div>
+  <div class="rect" id="block2">Block 2</div>
 
-      socket.on("connect", function () {
-        console.log("connected to server");
+  
+  
+  
+  <script>
+    var socket = io.connect('https://simple-webapp.glitch.me/');
+    $(function() {
 
-        socket.on("userId", () => {
-          console.log(`${socket.id}`);
-          let myUserId = socket.id;
-          let myUsername = document.getElementById("username");
-          myUsername.innerHTML = "Hello, " + myUserId;
-        });
+	// Set initial positions of blocks
+	$('#block1').css({ top: 50, left: 100 });
+   $('#block2').css({ top: 150, left: 400 });
 
-        socket.emit("adduser", () => {
-          let user = `${socket.id}`;
-        });
 
-        //////////////////////
-        $(document).on("mousemove", function (event) {
-          console.log("event triggered");
-          socket.emit("mouseActivity", { x: event.pageX, y: event.pageY });
-        });
+	// Make blocks draggable and send position changes to server
+	$('.block').draggable({
+		containment: '#body',
+		stop: function(event, ui) {
+			socket.emit('move', {
+				id: $(this).attr('id'),
+				top: ui.offset.top,
+				left: ui.offset.left
+			});
+		}
+	});
+      
+  	$('.rect').draggable({
+		containment: '#body',
+		stop: function(event, ui) {
+			socket.emit('move', {
+				id: $(this).attr('id'),
+				top: ui.offset.top,
+				left: ui.offset.left
+			});
+		}
+	});
 
-        socket.on("allMouseActivity", function (data) {
-          console.log("all mouse activity");
-
-          if ($('.pointer[session_id="' + data.session_id + '"]').length <= 0) {
-            console.log("pointer session id");
-            $("body").append(
-              '<div class="pointer" session_id="' + data.session_id + '"></div>'
-            );
-          }
-
-          var $pointer = $('.pointer[session_id="' + data.session_id + '"]');
-          $pointer.css("left", data.coords.x);
-          $pointer.css("top", data.coords.y);
-        });
-
-        //////////////////
-
-        socket.on("disconnect", function () {
-          console.log("disconnected from server");
-        });
-      });
-    </script>
-
-    <style>
-      .pointer {
-        position: absolute;
-        background: red;
-         width: 20px;
-        height: 20px;
-        border-radius: 10px;
-        z-index: 3;
-      }
-    </style>
-  </body>
+});
+    	
+    // Receive position changes from server and update blocks
+	socket.on('moveUpdate', function(data) {
+    console.log(data);
+		$('#'+data.id).css({
+			top: data.data.top,
+			left: data.data.left,
+      id: data.data.id
+		});
+    
+    
+     var $block = $('#'+data.data.id);
+          $block.css("left", data.data.left);
+          $block.css("top", data.data.top);
+    
+  
+	});
+	 
+     
+        
+  
+  </script>
+</body>
 </html>

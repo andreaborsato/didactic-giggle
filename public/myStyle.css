@@ -1,0 +1,16 @@
+	.block {
+			width: 100px;
+			height: 100px;
+			background-color: #f44336;
+			position: absolute;
+			cursor: move;
+		}
+    
+    
+    .rect {
+			width: 400px;
+			height: 250px;
+			background-color: #d3d800;
+			position: absolute;
+			cursor: move;
+		}
